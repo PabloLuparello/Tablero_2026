@@ -982,7 +982,8 @@ function doLogout() {
 async function apiGet() {
   const url = getApiUrl();
   if (!url) throw new Error('Sin URL configurada');
-  const res = await fetch(url);
+  const bust = `?t=${Date.now()}`;
+  const res = await fetch(url + bust);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -2041,7 +2042,12 @@ async function ejecutarEliminarKPI() {
     if(res.status!=='ok') throw new Error(res.mensaje||'Error desconocido');
     msg.textContent='✓ '+(res.mensaje||'Eliminado'); msg.style.color='var(--verde)';
     toast(`KPI ${kpiId} eliminado ✓`);
-    setTimeout(()=>{ cerrarModalEliminar(); syncData(); },800);
+    setTimeout(()=>{
+      cerrarModalEliminar();
+      localStorage.removeItem(DATA_KEY);
+      localStorage.removeItem(DATA_TS_KEY);
+      syncData();
+    },800);
   } catch(e) {
     console.log('[ELIMINAR] Error:', e.message);
     msg.textContent='✗ '+e.message; msg.style.color='var(--rojo)';
@@ -2158,7 +2164,12 @@ async function guardarEditarKPI() {
     msg.textContent = '✓ ' + (res.mensaje || 'KPI actualizado');
     msg.className = 'save-msg ok';
     toast(`KPI ${kpiId} actualizado en Google Sheets ✓`);
-    setTimeout(() => { cerrarEditarKPI(); syncData(); }, 800);
+    setTimeout(() => {
+      cerrarEditarKPI();
+      localStorage.removeItem(DATA_KEY);
+      localStorage.removeItem(DATA_TS_KEY);
+      syncData();
+    }, 800);
   } catch(e) {
     console.log('[EDITAR] Error:', e.message);
     msg.textContent = '✗ ' + e.message;
@@ -2204,7 +2215,12 @@ async function guardarNuevoKPI() {
     if(res.status!=='ok') throw new Error(res.mensaje||'Error desconocido');
     msg.textContent='✓ Objetivo guardado'; msg.className='save-msg ok';
     toast(`KPI ${kpiId} agregado a ${gerencia} ✓`);
-    cerrarFormNuevoKPI(); setTimeout(syncData,1200);
+    cerrarFormNuevoKPI();
+    setTimeout(()=>{
+      localStorage.removeItem(DATA_KEY);
+      localStorage.removeItem(DATA_TS_KEY);
+      syncData();
+    }, 1200);
   } catch(e) {
     msg.textContent='✗ '+e.message; msg.className='save-msg err';
     toast(e.message,'err');
