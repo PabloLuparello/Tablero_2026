@@ -1943,7 +1943,13 @@ function renderGestionar() {
     };
     // Get Q metas from the 4 rows
     const qRows = (d.carga_q||[]).filter(r=>(r['KPI_ID']||'')===kpiId&&(r['Responsable']||'')===gerencia);
-    const getQMeta = q => { const r=qRows.find(x=>x['Q']===q); return r?(r['Meta_Q (editable)']??r['Meta_Q']??'—'):'—'; };
+    const getQMeta = q => {
+      const r = qRows.find(x => x['Q'] === q);
+      if (!r) return '—';
+      const val = r['Meta_Q (editable)'] ?? r['Meta_Q'];
+      if (val === null || val === undefined || val === '') return '—';
+      return val;
+    };
     return `<tr>
       <td class="bold" data-label="Gerencia">${gerencia}</td>
       <td class="mono" data-label="KPI ID">${kpiId}</td>
@@ -2096,7 +2102,11 @@ function abrirEditarKPI(kpiId, gerencia) {
   const first = rows[0] || {};
   const getQMeta = q => {
     const r = rows.find(x => x['Q'] === q);
-    return r ? (r['Meta_Q (editable)'] ?? r['Meta_Q'] ?? '') : '';
+    if (!r) return '';
+    const val = r['Meta_Q (editable)'] ?? r['Meta_Q'];
+    // Return 0 as '0', not as empty — 0 is a valid meta value
+    if (val === null || val === undefined || val === '—' || val === '') return '';
+    return String(val);
   };
 
   // Populate form
