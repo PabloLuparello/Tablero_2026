@@ -1221,6 +1221,7 @@ function toggleStatPanel(tipo, card) {
   if (tipo==='amarillo') filtered = dirs.filter(r => { const v=getQVal(r,currentQ); return v>=0.7&&v<0.9; });
   if (tipo==='rojo')     filtered = dirs.filter(r => getQVal(r,currentQ)<0.7);
   document.getElementById('stat-drill-title').textContent = labels[tipo];
+  document.getElementById('stat-drill-rows').innerHTML = filtered.length ? filtered.map(r => {
     const qv=getQVal(r,currentQ); const cls=semColor(qv);
     const q1=getQVal(r,'Q1'),q2=getQVal(r,'Q2'),q3=getQVal(r,'Q3'),q4=getQVal(r,'Q4'),ytd=getQVal(r,'YTD');
     const id=r['Obj_ID']||r.id||''; const obj=r['Objetivo']||r.obj||''; const area=r['Área']||r.area||'';
