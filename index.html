@@ -1143,10 +1143,10 @@ function renderDashboard() {
   const rojos = vals.filter(v=>v<0.7).length;
 
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card" onclick="toggleStatPanel('all', dirs, this)" title="Ver todos los objetivos"><div class="stat-num accent">${pct(avg)}</div><div class="stat-lbl">Avance ${currentQ}</div><div class="stat-hint">▾ clic para ver detalle</div></div>
-    <div class="stat-card" onclick="toggleStatPanel('verde', dirs, this)" title="Ver objetivos en verde"><div class="stat-num verde">${verdes}</div><div class="stat-lbl">VERDE ≥90%</div><div class="stat-hint">▾ clic para ver detalle</div></div>
-    <div class="stat-card" onclick="toggleStatPanel('amarillo', dirs, this)" title="Ver objetivos en amarillo"><div class="stat-num amarillo">${amarillos}</div><div class="stat-lbl">AMARILLO 70-89%</div><div class="stat-hint">▾ clic para ver detalle</div></div>
-    <div class="stat-card" onclick="toggleStatPanel('rojo', dirs, this)" title="Ver objetivos en rojo"><div class="stat-num rojo">${rojos}</div><div class="stat-lbl">CRÍTICOS <70%</div><div class="stat-hint">▾ clic para ver detalle</div></div>`;
+    <div class="stat-card" onclick="toggleStatPanel('all', this)" title="Ver todos los objetivos"><div class="stat-num accent">${pct(avg)}</div><div class="stat-lbl">Avance ${currentQ}</div><div class="stat-hint">▾ clic para ver detalle</div></div>
+    <div class="stat-card" onclick="toggleStatPanel('verde', this)" title="Ver objetivos en verde"><div class="stat-num verde">${verdes}</div><div class="stat-lbl">VERDE ≥90%</div><div class="stat-hint">▾ clic para ver detalle</div></div>
+    <div class="stat-card" onclick="toggleStatPanel('amarillo', this)" title="Ver objetivos en amarillo"><div class="stat-num amarillo">${amarillos}</div><div class="stat-lbl">AMARILLO 70-89%</div><div class="stat-hint">▾ clic para ver detalle</div></div>
+    <div class="stat-card" onclick="toggleStatPanel('rojo', this)" title="Ver objetivos en rojo"><div class="stat-num rojo">${rojos}</div><div class="stat-lbl">CRÍTICOS <70%</div><div class="stat-hint">▾ clic para ver detalle</div></div>`;
 
   document.getElementById('dash-dir-table').innerHTML = dirs.map(r => {
     const qv = getQVal(r, currentQ); const cls = semColor(qv);
@@ -1202,7 +1202,7 @@ function renderDashboard() {
 // STAT CARD DRILL-DOWN
 // ═══════════════════════════════════════════════════════
 let _statPanelActive = null;
-function toggleStatPanel(tipo, dirs, card) {
+function toggleStatPanel(tipo, card) {
   const panel = document.getElementById('stat-drill-panel');
   const allCards = document.querySelectorAll('#dash-stats .stat-card');
   if (_statPanelActive === tipo && panel.classList.contains('open')) {
@@ -1212,18 +1212,15 @@ function toggleStatPanel(tipo, dirs, card) {
   allCards.forEach(c => c.className = 'stat-card');
   const colorMap = {all:'accent',verde:'verde',amarillo:'amarillo',rojo:'rojo'};
   card.classList.add('active-' + colorMap[tipo]);
+  const d = getData();
+  const dirs = d?.res_direccion || [];
+  const kpisQ = (d?.carga_q||[]).filter(k => (k['Q']||'')===currentQ);
   let filtered = dirs;
   const labels = {all:`Todos los objetivos (${currentQ})`,verde:`Objetivos en verde — ≥90% (${currentQ})`,amarillo:`Objetivos en riesgo — 70–89% (${currentQ})`,rojo:`Objetivos críticos — <70% (${currentQ})`};
   if (tipo==='verde')    filtered = dirs.filter(r => getQVal(r,currentQ)>=0.9);
   if (tipo==='amarillo') filtered = dirs.filter(r => { const v=getQVal(r,currentQ); return v>=0.7&&v<0.9; });
   if (tipo==='rojo')     filtered = dirs.filter(r => getQVal(r,currentQ)<0.7);
   document.getElementById('stat-drill-title').textContent = labels[tipo];
-
-  // Para rojos: buscar KPIs de gerencia con comentarios que alimentan esos objetivos
-  const d = getData();
-  const kpisQ = (d?.carga_q||[]).filter(k => (k['Q']||'')===currentQ);
-
-  document.getElementById('stat-drill-rows').innerHTML = filtered.length ? filtered.map(r => {
     const qv=getQVal(r,currentQ); const cls=semColor(qv);
     const q1=getQVal(r,'Q1'),q2=getQVal(r,'Q2'),q3=getQVal(r,'Q3'),q4=getQVal(r,'Q4'),ytd=getQVal(r,'YTD');
     const id=r['Obj_ID']||r.id||''; const obj=r['Objetivo']||r.obj||''; const area=r['Área']||r.area||'';
